@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+
+# Virtual environment
+.venv/
+
+# Build artifacts
+build/
+dist/
+
+# Config with credentials
+config.yaml
+
+# PyInstaller (keep desktop_lights.spec tracked for reproducible builds)
+*.spec
+!desktop_lights.spec
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# pytest
+.pytest_cache/

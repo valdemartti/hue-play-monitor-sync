@@ -1,0 +1,20 @@
+[project]
+name = "desktop-lights"
+version = "0.1.0"
+description = "Sync monitor colors to Philips Hue Gradient Lightstrips"
+requires-python = ">=3.11"
+dependencies = [
+    "mss>=10.0,<11",
+    "numpy>=1.24,<3",
+    "aiohttp>=3.10,<4",
+    "pyyaml>=6.0,<7",
+    "rumps>=0.4,<1",
+    "keyring>=25.0,<26",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio"]
+build = ["pyinstaller"]
+
+[project.scripts]
+desktop-lights = "src.main:main"
