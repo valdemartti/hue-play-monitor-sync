@@ -5,7 +5,7 @@ import logging
 import time
 
 from .color_processing import (
-    color_distance, rgb_array_to_xy, smooth_colors,
+    color_distance, hex_to_rgb, rgb_array_to_xy, smooth_colors,
 )
 from .config_manager import AppConfig, LightMapping
 from .hue_bridge import HueBridgeClient
@@ -13,6 +13,9 @@ from .screen_capture import ScreenCapture
 from .zone_mapper import sample_zone_colors
 
 logger = logging.getLogger(__name__)
+
+# Zones with all channels below this are considered dark and filled with idle_color
+_DARK_ZONE_THRESHOLD = 5.0
 
 
 class SyncEngine:
@@ -108,6 +111,12 @@ class SyncEngine:
             stride=self.config.sync.downsample_stride,
             reversed_zones=mapping.reversed,
         )
+
+        # Replace dark zones with the configured idle color
+        idle_rgb = hex_to_rgb(self.config.sync.idle_color)
+        for i in range(len(zone_rgb)):
+            if zone_rgb[i].max() < _DARK_ZONE_THRESHOLD:
+                zone_rgb[i] = idle_rgb
 
         current_xy = rgb_array_to_xy(zone_rgb)
 

@@ -77,6 +77,7 @@ The output is `dist/Desktop Lights.app` (approximately 35 MB). Copy it to any Ma
 | **Layout** | Current monitor fingerprint (e.g., `1920x1080_2560x1440`) |
 | **Map Lights** | Assign each light to a monitor, toggle reversed orientation |
 | **Brightness** | Set light brightness (20%, 40%, 60%, 80%, 100%) |
+| **Idle Color** | Color for dark screen zones — presets, macOS color picker, or hex input |
 | **Setup Bridge** | Discover/pair with Hue Bridge |
 | **Discover Lights** | Scan bridge for gradient-capable lights |
 
@@ -125,6 +126,7 @@ sync:
   smoothing_alpha: 0.4     # Temporal smoothing (0 = none, higher = more smoothing)
   delta_threshold: 5.0     # Minimum color change to send an update
   brightness: 60           # Static brightness / opacity (0-100, also adjustable from menu bar)
+  idle_color: "#ffffff"    # Color for dark screen zones (hex, also adjustable from menu bar)
   margin_percent: 5        # Skip this % of screen edges (avoids UI chrome)
   downsample_stride: 4     # Pixel sampling stride (higher = faster, less precise)
 ```

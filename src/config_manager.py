@@ -37,6 +37,7 @@ class SyncConfig:
     smoothing_alpha: float = 0.4
     delta_threshold: float = 5.0
     brightness: float = 60.0          # Static brightness / opacity (0-100)
+    idle_color: str = "#ffffff"       # Color shown for dark screen zones (hex)
     margin_percent: float = 5.0
     downsample_stride: int = 4
 
@@ -142,6 +143,7 @@ def load_config(path: Path | None = None) -> AppConfig:
         smoothing_alpha=sync_data.get("smoothing_alpha", 0.4),
         delta_threshold=sync_data.get("delta_threshold", 5.0),
         brightness=sync_data.get("brightness", 60.0),
+        idle_color=sync_data.get("idle_color", "#ffffff"),
         margin_percent=sync_data.get("margin_percent", 5.0),
         downsample_stride=sync_data.get("downsample_stride", 4),
     )
@@ -188,6 +190,7 @@ def save_config(config: AppConfig, path: Path | None = None):
             "smoothing_alpha": config.sync.smoothing_alpha,
             "delta_threshold": config.sync.delta_threshold,
             "brightness": config.sync.brightness,
+            "idle_color": config.sync.idle_color,
             "margin_percent": config.sync.margin_percent,
             "downsample_stride": config.sync.downsample_stride,
         },

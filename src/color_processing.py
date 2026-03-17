@@ -40,6 +40,14 @@ def rgb_to_xy(r: int, g: int, b: int) -> tuple[float, float]:
     return clamp_to_gamut(x, y)
 
 
+def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
+    """Convert a hex color string (e.g. '#ff8c00') to an (R, G, B) tuple."""
+    h = hex_color.lstrip("#")
+    if len(h) != 6:
+        return (255, 255, 255)
+    return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+
+
 def rgb_array_to_xy(colors: np.ndarray) -> list[tuple[float, float]]:
     """Convert array of RGB values (Nx3) to list of CIE xy tuples."""
     return [rgb_to_xy(int(c[0]), int(c[1]), int(c[2])) for c in colors]

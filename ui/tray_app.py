@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import subprocess
 import threading
 
 import rumps
@@ -15,6 +16,14 @@ from src.screen_capture import ScreenCapture
 from src.sync_engine import SyncEngine
 
 logger = logging.getLogger(__name__)
+
+_IDLE_COLOR_PRESETS = [
+    ("Warm White", "#ffd2a0"),
+    ("Cool White", "#ffffff"),
+    ("Amber", "#ff8c00"),
+    ("Coral", "#ff7f7f"),
+    ("Lavender", "#c4a0ff"),
+]
 
 
 class DesktopLightsApp(rumps.App):
@@ -129,6 +138,20 @@ class DesktopLightsApp(rumps.App):
             brightness_menu.add(item)
         items.append(brightness_menu)
 
+        # Idle color submenu
+        current_idle = self.config.sync.idle_color.lower()
+        idle_menu = rumps.MenuItem(f"Idle Color ({current_idle})")
+        for name, hex_val in _IDLE_COLOR_PRESETS:
+            item = rumps.MenuItem(name, callback=self._set_idle_color_preset)
+            item._custom_data = {"color": hex_val}
+            if hex_val == current_idle:
+                item.state = 1
+            idle_menu.add(item)
+        idle_menu.add(None)
+        idle_menu.add(rumps.MenuItem("Pick Color...", callback=self._pick_idle_color))
+        idle_menu.add(rumps.MenuItem("Enter Hex...", callback=self._enter_idle_color_hex))
+        items.append(idle_menu)
+
         items.extend([
             rumps.MenuItem("Setup Bridge", callback=self._setup_bridge),
             rumps.MenuItem("Discover Lights", callback=self._discover_lights),
@@ -186,6 +209,56 @@ class DesktopLightsApp(rumps.App):
         else:
             self.engine = SyncEngine(self.config, self.bridge)
         self._build_menu()
+
+    def _apply_idle_color(self, hex_color: str):
+        """Apply a new idle color, save config, and restart engine if running."""
+        self.config.sync.idle_color = hex_color.lower()
+        save_config(self.config)
+        if self.engine.running:
+            self._run_async(self.engine.stop())
+            self.engine = SyncEngine(self.config, self.bridge)
+            self._run_async(self.engine.start())
+        else:
+            self.engine = SyncEngine(self.config, self.bridge)
+        self._build_menu()
+
+    def _set_idle_color_preset(self, sender):
+        self._apply_idle_color(sender._custom_data["color"])
+
+    def _pick_idle_color(self, _):
+        """Open the native macOS color picker via AppleScript."""
+        current = self.config.sync.idle_color.lstrip("#")
+        r = int(current[0:2], 16) * 257
+        g = int(current[2:4], 16) * 257
+        b = int(current[4:6], 16) * 257
+        result = subprocess.run(
+            ["osascript", "-e", f"choose color default color {{{r}, {g}, {b}}}"],
+            capture_output=True, text=True,
+        )
+        if result.returncode == 0:
+            parts = result.stdout.strip().split(", ")
+            r = int(parts[0]) // 257
+            g = int(parts[1]) // 257
+            b = int(parts[2]) // 257
+            self._apply_idle_color(f"#{r:02x}{g:02x}{b:02x}")
+
+    def _enter_idle_color_hex(self, _):
+        """Prompt for a hex color code."""
+        resp = rumps.Window(
+            message="Enter a hex color code for dark screen zones:",
+            title="Idle Color",
+            default_text=self.config.sync.idle_color,
+        ).run()
+        if resp.clicked:
+            value = resp.text.strip().lstrip("#")
+            if len(value) == 6:
+                try:
+                    int(value, 16)
+                    self._apply_idle_color(f"#{value}")
+                    return
+                except ValueError:
+                    pass
+            rumps.alert("Invalid hex color. Use format like #ff8c00.")
 
     def _toggle_reversed(self, sender):
         data = sender._custom_data
