@@ -8,7 +8,7 @@ Works with any number of monitors and lights. Remembers separate mappings for di
 
 - Real-time screen color capture at 10-15 FPS
 - Per-zone gradient control via Hue Bridge v2 API
-- Adaptive brightness — scales with screen content, turns lights off on dark scenes
+- Configurable static brightness (default 60%)
 - Multi-monitor support with automatic layout detection
 - Profile-based config — remembers light mappings per monitor arrangement
 - Flexible light-to-monitor mapping (multiple lights can follow the same monitor)
@@ -76,6 +76,7 @@ The output is `dist/Desktop Lights.app` (approximately 35 MB). Copy it to any Ma
 | **FPS** | Current update rate |
 | **Layout** | Current monitor fingerprint (e.g., `1920x1080_2560x1440`) |
 | **Map Lights** | Assign each light to a monitor, toggle reversed orientation |
+| **Brightness** | Set light brightness (20%, 40%, 60%, 80%, 100%) |
 | **Setup Bridge** | Discover/pair with Hue Bridge |
 | **Discover Lights** | Scan bridge for gradient-capable lights |
 
@@ -123,22 +124,23 @@ sync:
   fps: 12                  # Target frames per second (Hue Bridge caps at ~10 req/s per light)
   smoothing_alpha: 0.4     # Temporal smoothing (0 = none, higher = more smoothing)
   delta_threshold: 5.0     # Minimum color change to send an update
-  brightness: 100          # Maximum brightness (0-100)
-  min_brightness: 2.0      # Brightness floor before turning off (0-100)
-  black_threshold: 0.01    # Screen darkness level that triggers light off (0-1)
+  brightness: 60           # Static brightness / opacity (0-100, also adjustable from menu bar)
   margin_percent: 5        # Skip this % of screen edges (avoids UI chrome)
   downsample_stride: 4     # Pixel sampling stride (higher = faster, less precise)
 ```
 
 ## How It Works
 
+<p align="center">
+  <img src="docs/zone-sampling.svg" alt="Zone sampling diagram showing arch-based edge sampling zones" width="700">
+</p>
+
 1. **Screen capture** — `mss` grabs each monitor at the target FPS
-2. **Zone sampling** — Each screen is divided into vertical strips (one per gradient zone). The mean color of each strip is computed using downsampled pixels
+2. **Zone sampling** — Colors are sampled along an arch that follows the lightstrip's physical path: up the left edge, across the top, and down the right edge. Each zone samples the outer 20% of the screen near its corresponding edge section
 3. **Color conversion** — RGB colors are converted to CIE xy chromaticity with Gamut C clamping (the color space used by Hue lights)
-4. **Brightness scaling** — The light's brightness is scaled proportionally to the brightest zone. If all zones are near-black, the light turns off entirely
-5. **Temporal smoothing** — An exponential moving average smooths color transitions between frames
-6. **Delta detection** — Updates are only sent when colors change beyond a threshold, reducing unnecessary bridge traffic
-7. **Gradient update** — Colors are sent to the Hue Bridge v2 API as gradient points (`PUT /clip/v2/resource/light/{id}`)
+4. **Temporal smoothing** — An exponential moving average smooths color transitions between frames
+5. **Delta detection** — Updates are only sent when colors change beyond a threshold, reducing unnecessary bridge traffic
+6. **Gradient update** — Colors are sent to the Hue Bridge v2 API as gradient points at a static configurable brightness (`PUT /clip/v2/resource/light/{id}`)
 
 ## Project Structure
 
@@ -188,7 +190,6 @@ python -m tests.test_capture
 
 **Flickering** — Increase `smoothing_alpha` (e.g., 0.6) for heavier temporal smoothing, or increase `delta_threshold` to skip minor changes.
 
-**Lights too dim on saturated colors** — This was fixed by using max RGB channel for brightness instead of luminance. If you see this, make sure you're on the latest version.
 
 ## License
 

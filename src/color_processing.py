@@ -40,26 +40,9 @@ def rgb_to_xy(r: int, g: int, b: int) -> tuple[float, float]:
     return clamp_to_gamut(x, y)
 
 
-def rgb_to_brightness(r: int, g: int, b: int) -> float:
-    """Compute brightness (0-1) from RGB using max linearized channel.
-
-    Using max channel rather than luminance (Y) avoids saturated colors
-    like red or blue appearing much dimmer than they should.
-    """
-    r_lin = _gamma_correct(r / 255.0)
-    g_lin = _gamma_correct(g / 255.0)
-    b_lin = _gamma_correct(b / 255.0)
-    return max(r_lin, g_lin, b_lin)
-
-
 def rgb_array_to_xy(colors: np.ndarray) -> list[tuple[float, float]]:
     """Convert array of RGB values (Nx3) to list of CIE xy tuples."""
     return [rgb_to_xy(int(c[0]), int(c[1]), int(c[2])) for c in colors]
-
-
-def rgb_array_brightness(colors: np.ndarray) -> list[float]:
-    """Compute perceived brightness (0-1) for each RGB color in the array."""
-    return [rgb_to_brightness(int(c[0]), int(c[1]), int(c[2])) for c in colors]
 
 
 def _cross_product_2d(o: tuple[float, float], a: tuple[float, float], b: tuple[float, float]) -> float:

@@ -5,7 +5,7 @@ import logging
 import time
 
 from .color_processing import (
-    color_distance, rgb_array_brightness, rgb_array_to_xy, smooth_colors,
+    color_distance, rgb_array_to_xy, smooth_colors,
 )
 from .config_manager import AppConfig, LightMapping
 from .hue_bridge import HueBridgeClient
@@ -23,7 +23,6 @@ class SyncEngine:
         self._running = False
         self._task: asyncio.Task | None = None
         self._previous_colors: dict[str, list[tuple[float, float]]] = {}
-        self._light_is_on: dict[str, bool] = {}
         self._actual_fps: float = 0.0
         self._active_mappings: list[LightMapping] = []
         self._active_fingerprint: str = ""
@@ -70,10 +69,6 @@ class SyncEngine:
             logger.warning("Some mappings reference unavailable monitors (have %d)", max_mon)
         self._active_mappings = valid
 
-        # Assume lights are on at start
-        for m in valid:
-            self._light_is_on[m.light_id] = True
-
         self._running = True
         self._task = asyncio.create_task(self._run_loop())
         logger.info(
@@ -94,18 +89,17 @@ class SyncEngine:
         self.capture.close()
         logger.info("Sync engine stopped")
 
-    def _process_monitor(self, mapping: LightMapping) -> tuple[list[tuple[float, float]] | None, float]:
+    def _process_monitor(self, mapping: LightMapping) -> list[tuple[float, float]] | None:
         """Capture and process one monitor's colors.
 
         Returns:
-            (colors, peak_brightness) — colors is None if no update needed.
-            peak_brightness is the max zone luminance (0-1).
+            colors as CIE xy tuples, or None if no update needed.
         """
         try:
             frame = self.capture.capture(mapping.monitor)
         except ValueError as e:
             logger.warning("Capture failed for monitor %d: %s", mapping.monitor, e)
-            return None, 0.0
+            return None
 
         zone_rgb = sample_zone_colors(
             frame,
@@ -114,10 +108,6 @@ class SyncEngine:
             stride=self.config.sync.downsample_stride,
             reversed_zones=mapping.reversed,
         )
-
-        # Compute per-zone brightness before color conversion
-        zone_brightness = rgb_array_brightness(zone_rgb)
-        peak_brightness = max(zone_brightness)
 
         current_xy = rgb_array_to_xy(zone_rgb)
 
@@ -131,47 +121,24 @@ class SyncEngine:
                 color_distance(s, p) for s, p in zip(smoothed, previous)
             )
             if max_delta < self.config.sync.delta_threshold:
-                return None, peak_brightness
+                return None
 
         self._previous_colors[mapping.light_id] = smoothed
-        return smoothed, peak_brightness
+        return smoothed
 
     async def _run_loop(self):
         target_interval = 1.0 / self.config.sync.fps
-        black_threshold = self.config.sync.black_threshold
-        min_brightness = self.config.sync.min_brightness
-        max_brightness = self.config.sync.brightness
+        brightness = self.config.sync.brightness
 
         while self._running:
             loop_start = time.monotonic()
 
             updates = []
             for mapping in self._active_mappings:
-                colors, peak = self._process_monitor(mapping)
-                is_on = self._light_is_on.get(mapping.light_id, True)
-                all_dark = peak < black_threshold
-
-                if all_dark and is_on:
-                    # Screen went dark — turn off
-                    updates.append(self.bridge.turn_off(mapping.light_id))
-                    self._light_is_on[mapping.light_id] = False
-                    logger.debug("Turning off %s (dark content)", mapping.light_id)
-                elif not all_dark and not is_on:
-                    # Content appeared — turn on, then send gradient
-                    updates.append(self.bridge.turn_on(mapping.light_id))
-                    self._light_is_on[mapping.light_id] = True
-                    logger.debug("Turning on %s (content detected)", mapping.light_id)
-                    if colors is not None:
-                        # Scale brightness by peak luminance
-                        scaled = max(min_brightness, peak * max_brightness)
-                        updates.append(
-                            self.bridge.set_gradient(mapping.light_id, colors, brightness=scaled)
-                        )
-                elif not all_dark and colors is not None:
-                    # Normal update — scale brightness by peak luminance
-                    scaled = max(min_brightness, peak * max_brightness)
+                colors = self._process_monitor(mapping)
+                if colors is not None:
                     updates.append(
-                        self.bridge.set_gradient(mapping.light_id, colors, brightness=scaled)
+                        self.bridge.set_gradient(mapping.light_id, colors, brightness=brightness)
                     )
 
             if updates:

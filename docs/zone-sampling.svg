@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="screenGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <!-- LED strip gradient along the arch -->
+    <linearGradient id="ledGradTop" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffd93d"/>
+      <stop offset="50%" stop-color="#6bcb77"/>
+      <stop offset="100%" stop-color="#4d96ff"/>
+    </linearGradient>
+    <linearGradient id="ledGradLeft" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#ff6b6b"/>
+      <stop offset="100%" stop-color="#ffd93d"/>
+    </linearGradient>
+    <linearGradient id="ledGradRight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4d96ff"/>
+      <stop offset="100%" stop-color="#9b59b6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="560" fill="#0d1117" rx="8"/>
+
+  <!-- Title -->
+  <text x="400" y="35" text-anchor="middle" fill="#e6edf3" font-size="16" font-weight="600">Hue Play Gradient Lightstrip PC — Arch Sampling Zones (5 zones)</text>
+
+  <!-- Monitor bezel -->
+  <rect x="100" y="55" width="600" height="400" rx="12" fill="#2d2d2d" stroke="#444" stroke-width="2"/>
+
+  <!-- Screen area (640x390 mapped to 560x370) -->
+  <rect x="120" y="70" width="560" height="370" rx="4" fill="url(#screenGrad)"/>
+
+  <!-- LED strip glow behind monitor -->
+  <line x1="140" y1="52" x2="660" y2="52" stroke="url(#ledGradTop)" stroke-width="6" filter="url(#glow)" stroke-linecap="round"/>
+  <line x1="97" y1="70" x2="97" y2="440" stroke="url(#ledGradLeft)" stroke-width="6" filter="url(#glow)" stroke-linecap="round"/>
+  <line x1="703" y1="70" x2="703" y2="440" stroke="url(#ledGradRight)" stroke-width="6" filter="url(#glow)" stroke-linecap="round"/>
+
+  <!--
+    Arch zone geometry for a 1920x1080 screen with 5% margin:
+    Effective area: 1728 x 972 (after 5% margin on each side)
+    Depth: 20% of each dimension → depth_x=345, depth_y=194
+    Arch perimeter: 972 + 1728 + 972 = 3672
+    Zone length: 734.4
+
+    Zone 1: 0–734      → left edge, bottom 734px of 972 (75% of left)
+    Zone 2: 734–1469    → left edge top 238px + top edge first 496px
+    Zone 3: 1469–2203   → top edge 496px–1230px (center top)
+    Zone 4: 2203–2938   → top edge 1230px–1728px + right edge top 238px
+    Zone 5: 2938–3672   → right edge, bottom 734px of 972 (75% of right)
+
+    Screen coords (120,70)-(680,440), effective area:
+    margin 5% of 560=28px horizontally, 5% of 370=18px vertically
+    x0=148, x1=652, y0=88, y1=422 → ew=504, eh=334
+    depth_x = 0.20 * 504 = 101, depth_y = 0.20 * 334 = 67
+    Arch: 334 + 504 + 334 = 1172, zone_len = 234.4
+
+    Zone 1 (0–234):     left edge, row (y0+334-234)=188 to (y0+334)=422 → y:188–422, x:148–249
+    Zone 2 (234–469):   left edge top 100px (y:88–188, x:148–249) + top 135px (y:88–155, x:148–283)
+    Zone 3 (469–703):   top edge (y:88–155, x:283–431)
+    Zone 4 (703–938):   top edge (y:88–155, x:431–579) + right edge top 100px (y:88–188, x:551–652)
+    Zone 5 (938–1172):  right edge (y:188–422, x:551–652)
+  -->
+
+  <!-- Margin indicators (subtle lines) -->
+  <rect x="120" y="70" width="28" height="370" fill="#000" opacity="0.15"/>
+  <rect x="652" y="70" width="28" height="370" fill="#000" opacity="0.15"/>
+  <rect x="120" y="70" width="560" height="18" fill="#000" opacity="0.15"/>
+  <rect x="120" y="422" width="560" height="18" fill="#000" opacity="0.15"/>
+
+  <!-- Zone 1: Left edge bottom (red) — y:188-422, x:148-249 -->
+  <rect x="148" y="188" width="101" height="234" fill="#ff6b6b" fill-opacity="0.25" stroke="#ff6b6b" stroke-width="1.5" stroke-opacity="0.6" stroke-dasharray="5,3" rx="3"/>
+  <!-- Sample dots -->
+  <circle cx="165" cy="210" r="2.5" fill="#ff6b6b" opacity="0.7"/>
+  <circle cx="195" cy="250" r="2.5" fill="#ff6b6b" opacity="0.7"/>
+  <circle cx="175" cy="290" r="2.5" fill="#ff6b6b" opacity="0.7"/>
+  <circle cx="210" cy="330" r="2.5" fill="#ff6b6b" opacity="0.7"/>
+  <circle cx="160" cy="360" r="2.5" fill="#ff6b6b" opacity="0.7"/>
+  <circle cx="230" cy="270" r="2.5" fill="#ff6b6b" opacity="0.7"/>
+  <circle cx="185" cy="400" r="2.5" fill="#ff6b6b" opacity="0.7"/>
+  <circle cx="220" cy="390" r="2.5" fill="#ff6b6b" opacity="0.7"/>
+
+  <!-- Zone 2: Left edge top + top-left corner (yellow) -->
+  <!-- Left part: y:88-188, x:148-249 -->
+  <rect x="148" y="88" width="101" height="100" fill="#ffd93d" fill-opacity="0.25" stroke="#ffd93d" stroke-width="1.5" stroke-opacity="0.6" stroke-dasharray="5,3" rx="3"/>
+  <!-- Top part: y:88-155, x:148-283 -->
+  <rect x="148" y="88" width="135" height="67" fill="#ffd93d" fill-opacity="0.20" stroke="#ffd93d" stroke-width="1.5" stroke-opacity="0.4" stroke-dasharray="5,3" rx="3"/>
+  <!-- Sample dots -->
+  <circle cx="170" cy="105" r="2.5" fill="#ffd93d" opacity="0.7"/>
+  <circle cx="200" cy="130" r="2.5" fill="#ffd93d" opacity="0.7"/>
+  <circle cx="165" cy="160" r="2.5" fill="#ffd93d" opacity="0.7"/>
+  <circle cx="230" cy="110" r="2.5" fill="#ffd93d" opacity="0.7"/>
+  <circle cx="210" cy="170" r="2.5" fill="#ffd93d" opacity="0.7"/>
+  <circle cx="260" cy="120" r="2.5" fill="#ffd93d" opacity="0.7"/>
+  <circle cx="180" cy="145" r="2.5" fill="#ffd93d" opacity="0.7"/>
+
+  <!-- Zone 3: Top center (green) — y:88-155, x:283-431 -->
+  <rect x="283" y="88" width="148" height="67" fill="#6bcb77" fill-opacity="0.25" stroke="#6bcb77" stroke-width="1.5" stroke-opacity="0.6" stroke-dasharray="5,3" rx="3"/>
+  <!-- Sample dots -->
+  <circle cx="305" cy="105" r="2.5" fill="#6bcb77" opacity="0.7"/>
+  <circle cx="340" cy="120" r="2.5" fill="#6bcb77" opacity="0.7"/>
+  <circle cx="370" cy="100" r="2.5" fill="#6bcb77" opacity="0.7"/>
+  <circle cx="395" cy="135" r="2.5" fill="#6bcb77" opacity="0.7"/>
+  <circle cx="320" cy="140" r="2.5" fill="#6bcb77" opacity="0.7"/>
+  <circle cx="410" cy="110" r="2.5" fill="#6bcb77" opacity="0.7"/>
+  <circle cx="360" cy="145" r="2.5" fill="#6bcb77" opacity="0.7"/>
+
+  <!-- Zone 4: Top-right corner + right edge top (blue) -->
+  <!-- Top part: y:88-155, x:431-579 -->
+  <rect x="431" y="88" width="148" height="67" fill="#4d96ff" fill-opacity="0.20" stroke="#4d96ff" stroke-width="1.5" stroke-opacity="0.4" stroke-dasharray="5,3" rx="3"/>
+  <!-- Right part: y:88-188, x:551-652 -->
+  <rect x="551" y="88" width="101" height="100" fill="#4d96ff" fill-opacity="0.25" stroke="#4d96ff" stroke-width="1.5" stroke-opacity="0.6" stroke-dasharray="5,3" rx="3"/>
+  <!-- Sample dots -->
+  <circle cx="460" cy="110" r="2.5" fill="#4d96ff" opacity="0.7"/>
+  <circle cx="500" cy="125" r="2.5" fill="#4d96ff" opacity="0.7"/>
+  <circle cx="535" cy="100" r="2.5" fill="#4d96ff" opacity="0.7"/>
+  <circle cx="570" cy="130" r="2.5" fill="#4d96ff" opacity="0.7"/>
+  <circle cx="600" cy="105" r="2.5" fill="#4d96ff" opacity="0.7"/>
+  <circle cx="580" cy="160" r="2.5" fill="#4d96ff" opacity="0.7"/>
+  <circle cx="620" cy="145" r="2.5" fill="#4d96ff" opacity="0.7"/>
+
+  <!-- Zone 5: Right edge bottom (purple) — y:188-422, x:551-652 -->
+  <rect x="551" y="188" width="101" height="234" fill="#9b59b6" fill-opacity="0.25" stroke="#9b59b6" stroke-width="1.5" stroke-opacity="0.6" stroke-dasharray="5,3" rx="3"/>
+  <!-- Sample dots -->
+  <circle cx="570" cy="210" r="2.5" fill="#9b59b6" opacity="0.7"/>
+  <circle cx="600" cy="250" r="2.5" fill="#9b59b6" opacity="0.7"/>
+  <circle cx="580" cy="290" r="2.5" fill="#9b59b6" opacity="0.7"/>
+  <circle cx="620" cy="330" r="2.5" fill="#9b59b6" opacity="0.7"/>
+  <circle cx="575" cy="360" r="2.5" fill="#9b59b6" opacity="0.7"/>
+  <circle cx="610" cy="270" r="2.5" fill="#9b59b6" opacity="0.7"/>
+  <circle cx="590" cy="400" r="2.5" fill="#9b59b6" opacity="0.7"/>
+  <circle cx="635" cy="390" r="2.5" fill="#9b59b6" opacity="0.7"/>
+
+  <!-- Zone labels along the arch -->
+  <!-- Zone 1: left side -->
+  <text x="85" y="320" text-anchor="middle" fill="#ff6b6b" font-size="11" font-weight="600" transform="rotate(-90, 85, 320)">Zone 1</text>
+  <!-- Zone 2: top-left -->
+  <text x="85" y="140" text-anchor="middle" fill="#ffd93d" font-size="11" font-weight="600" transform="rotate(-90, 85, 140)">Zone 2</text>
+  <!-- Zone 3: top center -->
+  <text x="357" y="62" text-anchor="middle" fill="#6bcb77" font-size="11" font-weight="600">Zone 3</text>
+  <!-- Zone 4: top-right -->
+  <text x="715" y="140" text-anchor="middle" fill="#4d96ff" font-size="11" font-weight="600" transform="rotate(90, 715, 140)">Zone 4</text>
+  <!-- Zone 5: right side -->
+  <text x="715" y="320" text-anchor="middle" fill="#9b59b6" font-size="11" font-weight="600" transform="rotate(90, 715, 320)">Zone 5</text>
+
+  <!-- Arch direction arrow (curved path showing zone order) -->
+  <path d="M 135 420 L 135 88 Q 135 62 160 62 L 640 62 Q 665 62 665 88 L 665 420"
+        fill="none" stroke="#e6edf3" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="6,4"/>
+  <!-- Arrow start -->
+  <polygon points="130,410 135,425 140,410" fill="#e6edf3" fill-opacity="0.4"/>
+  <!-- Arrow end -->
+  <polygon points="660,410 665,425 670,410" fill="#e6edf3" fill-opacity="0.4"/>
+  <text x="133" y="448" text-anchor="middle" fill="#8b949e" font-size="9">start</text>
+  <text x="667" y="448" text-anchor="middle" fill="#8b949e" font-size="9">end</text>
+
+  <!-- Dark center area label -->
+  <text x="400" y="290" text-anchor="middle" fill="#8b949e" font-size="12" opacity="0.5">screen center</text>
+  <text x="400" y="308" text-anchor="middle" fill="#8b949e" font-size="12" opacity="0.5">(not sampled)</text>
+
+  <!-- Monitor stand -->
+  <rect x="340" y="455" width="120" height="15" rx="3" fill="#2d2d2d" stroke="#444" stroke-width="1"/>
+  <rect x="310" y="470" width="180" height="8" rx="4" fill="#2d2d2d" stroke="#444" stroke-width="1"/>
+
+  <!-- Legend -->
+  <rect x="100" y="500" width="600" height="48" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <circle cx="125" cy="518" r="3" fill="#ff6b6b"/>
+  <circle cx="128" cy="516" r="2" fill="#ff6b6b"/>
+  <text x="138" y="522" fill="#8b949e" font-size="10">= sampled pixels</text>
+  <rect x="260" y="512" width="18" height="12" fill="none" stroke="#888" stroke-width="1" stroke-dasharray="3,3" rx="2"/>
+  <text x="284" y="522" fill="#8b949e" font-size="10">= zone boundary (20% edge depth)</text>
+  <rect x="500" y="512" width="18" height="12" fill="#000" opacity="0.3" rx="2"/>
+  <text x="524" y="522" fill="#8b949e" font-size="10">= 5% margin</text>
+  <path d="M 120 538 L 145 538" stroke="#e6edf3" stroke-width="1" stroke-opacity="0.4" stroke-dasharray="4,3"/>
+  <polygon points="140,535 148,538 140,541" fill="#e6edf3" fill-opacity="0.5"/>
+  <text x="155" y="542" fill="#8b949e" font-size="10">= arch direction (lightstrip path: left → top → right)</text>
+</svg>

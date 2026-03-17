@@ -116,6 +116,19 @@ class DesktopLightsApp(rumps.App):
             map_menu.add(rumps.MenuItem("No lights discovered yet"))
 
         items.append(map_menu)
+
+        # Brightness submenu
+        brightness_menu = rumps.MenuItem("Brightness")
+        current_brightness = self.config.sync.brightness
+        for level in [20, 40, 60, 80, 100]:
+            label = f"{level}%"
+            item = rumps.MenuItem(label, callback=self._set_brightness)
+            item._custom_data = {"brightness": level}
+            if abs(current_brightness - level) < 1:
+                item.state = 1
+            brightness_menu.add(item)
+        items.append(brightness_menu)
+
         items.extend([
             rumps.MenuItem("Setup Bridge", callback=self._setup_bridge),
             rumps.MenuItem("Discover Lights", callback=self._discover_lights),
@@ -159,6 +172,19 @@ class DesktopLightsApp(rumps.App):
 
         # Rebuild engine and menu
         self.engine = SyncEngine(self.config, self.bridge)
+        self._build_menu()
+
+    def _set_brightness(self, sender):
+        level = sender._custom_data["brightness"]
+        self.config.sync.brightness = float(level)
+        save_config(self.config)
+        # Restart engine so it picks up new brightness
+        if self.engine.running:
+            self._run_async(self.engine.stop())
+            self.engine = SyncEngine(self.config, self.bridge)
+            self._run_async(self.engine.start())
+        else:
+            self.engine = SyncEngine(self.config, self.bridge)
         self._build_menu()
 
     def _toggle_reversed(self, sender):

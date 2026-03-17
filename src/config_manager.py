@@ -36,9 +36,7 @@ class SyncConfig:
     fps: int = 12
     smoothing_alpha: float = 0.4
     delta_threshold: float = 5.0
-    brightness: float = 100.0
-    min_brightness: float = 2.0       # Minimum brightness before turning off (0-100)
-    black_threshold: float = 0.01     # Luminance below this = "black" (0-1 scale)
+    brightness: float = 60.0          # Static brightness / opacity (0-100)
     margin_percent: float = 5.0
     downsample_stride: int = 4
 
@@ -143,9 +141,7 @@ def load_config(path: Path | None = None) -> AppConfig:
         fps=sync_data.get("fps", 12),
         smoothing_alpha=sync_data.get("smoothing_alpha", 0.4),
         delta_threshold=sync_data.get("delta_threshold", 5.0),
-        brightness=sync_data.get("brightness", 100.0),
-        min_brightness=sync_data.get("min_brightness", 2.0),
-        black_threshold=sync_data.get("black_threshold", 0.01),
+        brightness=sync_data.get("brightness", 60.0),
         margin_percent=sync_data.get("margin_percent", 5.0),
         downsample_stride=sync_data.get("downsample_stride", 4),
     )
@@ -192,8 +188,6 @@ def save_config(config: AppConfig, path: Path | None = None):
             "smoothing_alpha": config.sync.smoothing_alpha,
             "delta_threshold": config.sync.delta_threshold,
             "brightness": config.sync.brightness,
-            "min_brightness": config.sync.min_brightness,
-            "black_threshold": config.sync.black_threshold,
             "margin_percent": config.sync.margin_percent,
             "downsample_stride": config.sync.downsample_stride,
         },
